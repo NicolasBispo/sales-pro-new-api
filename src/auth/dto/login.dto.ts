@@ -5,7 +5,7 @@ export class LoginDto {
   password: string;
 }
 
-export class LoginResponseDto implements Omit<User, 'password'> {
+export class LoginResponseDto {
   id: string;
   email: string;
   firstName: string;

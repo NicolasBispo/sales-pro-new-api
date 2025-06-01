@@ -1,5 +1,5 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { JwtPayload, verify } from 'jsonwebtoken';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JsonWebTokenError, TokenExpiredError, JwtPayload, verify } from 'jsonwebtoken';
 import { Observable } from 'rxjs';
 import { settings } from 'src/config/settings';
 import { PrismaService } from 'src/prisma.service';
@@ -10,7 +10,8 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean>  {
-    const request = context.switchToHttp().getRequest();
+    try {
+      const request = context.switchToHttp().getRequest();
     const token = request.headers['access-token'];
     if (!token) {
       return false;
@@ -24,7 +25,13 @@ export class JwtAuthGuard implements CanActivate {
     if (!user) {
       return false;
     }
-    request.user = user;
-    return true;
+      request.user = user;
+      return true;
+    } catch (error) {
+      if (error instanceof JsonWebTokenError || error instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+      throw new UnauthorizedException('Invalid or expired token');
+    }
   }
 }

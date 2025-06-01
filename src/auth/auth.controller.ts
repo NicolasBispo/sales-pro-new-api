@@ -7,6 +7,7 @@ import { User } from 'src/decorators/user.decorator';
 import { User as PrismaUser } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/jwt-auth/jwt-auth.guard';
 import { MeDto } from './dto/me.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +31,6 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async me(@User() user: PrismaUser) {
-    return new MeDto(user);
+    return plainToInstance(MeDto, user);
   }
 }
